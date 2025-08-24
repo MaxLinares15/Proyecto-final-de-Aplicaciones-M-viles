@@ -1,0 +1,11 @@
+export 'acerca_de_screen.dart';
+export 'areas_screen.dart';
+export 'equipo_screen.dart';
+export 'inicio_screen.dart';
+export 'mapa_areas_screen.dart';
+export 'medidas_screen.dart';
+export 'noticias_screen.dart';
+export 'servicios_screen.dart';
+export 'sobre_nosotros_screen.dart';
+export 'videos_screen.dart';
+export 'voluntariado_screen.dart';
