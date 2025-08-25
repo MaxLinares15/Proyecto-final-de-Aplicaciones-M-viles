@@ -25,33 +25,40 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.green),
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.green),
             child: Row(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 28,
                   backgroundImage: AssetImage('assets/logo.png'),
                 ),
-                SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Ministerio de Medio Ambiente',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                const SizedBox(width: 12),
+                // Usamos Expanded para que el texto se ajuste
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'Ministerio de Medio Ambiente',
+                        style: TextStyle(
+                          fontSize: 16, // reducido para evitar overflow
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        maxLines: 2, // permite saltar a otra línea si es necesario
+                        overflow: TextOverflow.ellipsis, // agrega "..." si aún se pasa
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'República Dominicana',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ],
+                      SizedBox(height: 8),
+                      Text(
+                        'República Dominicana',
+                        style: TextStyle(color: Colors.white70),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

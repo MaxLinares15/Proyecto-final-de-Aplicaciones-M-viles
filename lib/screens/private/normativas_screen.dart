@@ -5,9 +5,10 @@ class NormativasScreen extends StatelessWidget {
   const NormativasScreen({super.key});
 
   Future<List<dynamic>> _fetchNormas() async {
-    final res = await ApiService.request("api/normativas", method: "GET");
-    return res["datos"] ?? [];
-  }
+  final res = await ApiService.getNormativas();
+  return res["data"] ?? res["datos"] ?? [];
+}
+
 
   @override
   Widget build(BuildContext context) {

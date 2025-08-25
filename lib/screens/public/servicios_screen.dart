@@ -3,7 +3,7 @@ import '../../services/api_service.dart';
 import '../../models/models.dart';
 
 class ServiciosScreen extends StatefulWidget {
-  const ServiciosScreen({Key? key}) : super(key: key);
+  const ServiciosScreen({super.key});
 
   @override
   _ServiciosScreenState createState() => _ServiciosScreenState();

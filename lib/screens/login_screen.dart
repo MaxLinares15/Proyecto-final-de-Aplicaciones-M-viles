@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import 'home_screen.dart';
 import 'private/cambiar_password_screen.dart';
 import '../widgets/app_drawer.dart';
+import 'register_screen.dart'; // 👈 IMPORTA TU PANTALLA DE REGISTRO
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,13 +20,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     setState(() => loading = true);
     try {
-      // 👇 usamos el método ApiService.login que ya tienes definido
       final res = await ApiService.login(
         emailCtrl.text.trim(),
         passCtrl.text.trim(),
       );
 
-      if (res["exito"] == true && res["token"] != null) {
+      print("🔎 Respuesta login: $res");
+
+      if (res["token"] != null) {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
@@ -33,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res["mensaje"] ?? "Error de autenticación")),
+          SnackBar(content: Text(res["error"] ?? "Error de autenticación")),
         );
       }
     } catch (e) {
@@ -84,7 +86,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               },
               child: const Text("¿Olvidaste tu contraseña?"),
-            )
+            ),
+            // 👇 BOTÓN DE REGISTRO NUEVO
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                );
+              },
+              child: const Text("¿No tienes cuenta? Regístrate aquí"),
+            ),
           ],
         ),
       ),

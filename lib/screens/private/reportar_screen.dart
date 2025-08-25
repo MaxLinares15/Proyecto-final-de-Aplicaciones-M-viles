@@ -1,6 +1,8 @@
+// lib/screens/reportar/reportar_screen.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/api_service.dart';
 
@@ -32,13 +34,18 @@ class _ReportarScreenState extends State<ReportarScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Debes tomar una foto")),
+      );
+      return;
+    }
+
     setState(() => loading = true);
 
     try {
-      final fotoB64 =
-          _image == null ? '' : base64Encode(await _image!.readAsBytes());
+      final fotoB64 = base64Encode(await _image!.readAsBytes());
 
-      // ✅ Usamos el método correcto de ApiService
       final res = await ApiService.reportarDanio(
         titulo: tituloCtrl.text.trim(),
         descripcion: descCtrl.text.trim(),
@@ -48,13 +55,11 @@ class _ReportarScreenState extends State<ReportarScreen> {
       );
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res['mensaje'] ?? 'Reporte enviado')),
       );
 
       if (res['exito'] == true) {
-        // Limpiar formulario
         tituloCtrl.clear();
         descCtrl.clear();
         latCtrl.clear();
@@ -83,15 +88,13 @@ class _ReportarScreenState extends State<ReportarScreen> {
             TextFormField(
               controller: tituloCtrl,
               decoration: const InputDecoration(labelText: 'Título'),
-              validator: (v) =>
-                  v == null || v.isEmpty ? 'Requerido' : null,
+              validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
             ),
             TextFormField(
               controller: descCtrl,
               decoration: const InputDecoration(labelText: 'Descripción'),
               maxLines: 3,
-              validator: (v) =>
-                  v == null || v.isEmpty ? 'Requerido' : null,
+              validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
             ),
             const SizedBox(height: 8),
             Row(
@@ -112,18 +115,36 @@ class _ReportarScreenState extends State<ReportarScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: latCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Latitud'),
-                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Latitud'),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      signed: true,
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^-?\d*\.?\d*'),
+                      ),
+                    ],
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Requerido' : null,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextFormField(
                     controller: lngCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Longitud'),
-                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Longitud'),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      signed: true,
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^-?\d*\.?\d*'),
+                      ),
+                    ],
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Requerido' : null,
                   ),
                 ),
               ],

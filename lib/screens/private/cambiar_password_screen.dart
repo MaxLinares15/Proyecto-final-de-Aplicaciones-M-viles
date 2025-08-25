@@ -10,6 +10,7 @@ class CambiarPasswordScreen extends StatefulWidget {
 
 class _CambiarPasswordScreenState extends State<CambiarPasswordScreen> {
   final emailCtrl = TextEditingController();
+  final codigoCtrl = TextEditingController();
   final nuevaClaveCtrl = TextEditingController();
   bool loading = false;
 
@@ -17,26 +18,32 @@ class _CambiarPasswordScreenState extends State<CambiarPasswordScreen> {
     setState(() => loading = true);
     try {
       final res = await ApiService.request(
-        "cambiar_password.php", // 👈 revisa en la documentación de la API cuál es el endpoint correcto
+        "auth/reset",
         method: "POST",
         body: {
           "correo": emailCtrl.text.trim(),
-          "clave": nuevaClaveCtrl.text.trim(),
+          "codigo": "1234",
+          "nueva_password": nuevaClaveCtrl.text.trim(),
         },
       );
 
+      if (!mounted) return; // 👈 evita warnings
+
       if (res["exito"] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res["mensaje"] ?? "Contraseña cambiada con éxito")),
+          SnackBar(
+              content: Text(res["mensaje"] ?? "Contraseña cambiada con éxito")),
         );
         emailCtrl.clear();
         nuevaClaveCtrl.clear();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res["mensaje"] ?? "Error al cambiar contraseña")),
+          SnackBar(
+              content: Text(res["mensaje"] ?? "Error al cambiar contraseña")),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
@@ -55,6 +62,11 @@ class _CambiarPasswordScreenState extends State<CambiarPasswordScreen> {
             TextField(
               controller: emailCtrl,
               decoration: const InputDecoration(labelText: "Correo"),
+            ),
+            TextField(
+              controller: codigoCtrl,
+              decoration:
+                  const InputDecoration(labelText: "Código de verificación"),
             ),
             TextField(
               controller: nuevaClaveCtrl,
