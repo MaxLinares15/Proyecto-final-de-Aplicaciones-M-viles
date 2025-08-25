@@ -25,7 +25,7 @@ class _ReportarScreenState extends State<ReportarScreen> {
   Future<void> _pick() async {
     final x = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      imageQuality: 60,
+      imageQuality: 30, // reducir tamaño para evitar error 400
     );
     if (x != null) {
       setState(() => _image = File(x.path));
@@ -50,16 +50,18 @@ class _ReportarScreenState extends State<ReportarScreen> {
         titulo: tituloCtrl.text.trim(),
         descripcion: descCtrl.text.trim(),
         fotoBase64: fotoB64,
-        lat: latCtrl.text.trim(),
-        lng: lngCtrl.text.trim(),
+        lat: double.parse(latCtrl.text.trim()),
+        lng: double.parse(lngCtrl.text.trim()),
       );
 
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res['mensaje'] ?? 'Reporte enviado')),
       );
 
-      if (res['exito'] == true) {
+      // ✅ limpiar si el backend realmente creó el reporte
+      if (res.containsKey('reporte')) {
         tituloCtrl.clear();
         descCtrl.clear();
         latCtrl.clear();

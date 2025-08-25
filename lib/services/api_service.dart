@@ -191,30 +191,36 @@ class ApiService {
     return await request("medidas");
   }
 
-  static Future<Map<String, dynamic>> reportarDanio({
+
+static Future<Map<String, dynamic>> reportarDanio({
   required String titulo,
   required String descripcion,
   required String fotoBase64,
-  required String lat,
-  required String lng,
+  required double lat,
+  required double lng,
 }) async {
   final uri = Uri.parse("$baseUrl/reportes");
   final token = await getToken();
-  final headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
-  };
 
-  final body = {
-    "titulo": titulo,
-    "descripcion": descripcion,
-    "foto": fotoBase64,
-    "latitud": lat,
-    "longitud": lng,
-  };
+  final request = http.MultipartRequest("POST", uri);
 
-  print("📤 Body a enviar: $body");
-  final res = await http.post(uri, headers: headers, body: body);
+  // ✅ Token en headers
+  if (token != null && token.isNotEmpty) {
+    request.headers["Authorization"] = "Bearer $token";
+  }
+
+  // ✅ Campos requeridos
+  request.fields["titulo"] = titulo;
+  request.fields["descripcion"] = descripcion;
+  request.fields["foto"] = "data:image/jpeg;base64,$fotoBase64";
+  request.fields["latitud"] = lat.toString();
+  request.fields["longitud"] = lng.toString();
+
+  print("📤 Enviando multipart con campos: ${request.fields.keys}");
+
+  final streamedRes = await request.send();
+  final res = await http.Response.fromStream(streamedRes);
+
   print("📥 Respuesta ${res.statusCode}: ${res.body}");
 
   if (res.statusCode != 200 && res.statusCode != 201) {
@@ -224,13 +230,12 @@ class ApiService {
   return Map<String, dynamic>.from(jsonDecode(res.body));
 }
 
-
   static Future<Map<String, dynamic>> getServicios() async {
     return await request("servicios", method: "GET");
   }
 
   static Future<Map<String, dynamic>> getMisReportes() async {
-    return await request("reportes/mios", method: "GET");
+    return await request("reportes", method: "GET");
   }
 
   // 👥 Equipo del ministerio

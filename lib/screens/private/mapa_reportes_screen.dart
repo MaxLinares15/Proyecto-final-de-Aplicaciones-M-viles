@@ -12,6 +12,8 @@ class MapaReportesScreen extends StatefulWidget {
 
 class _MapaReportesScreenState extends State<MapaReportesScreen> {
   final Set<Marker> _markers = {};
+  GoogleMapController? _mapController;
+  bool _cargando = true;
 
   @override
   void initState() {
@@ -23,7 +25,6 @@ class _MapaReportesScreenState extends State<MapaReportesScreen> {
     try {
       final res = await ApiService.getMisReportes();
       final list = (res['datos'] ?? res['data'] ?? []) as List;
-
       final reps = list.map((e) => Reporte.fromJson(e)).toList();
 
       setState(() {
@@ -40,26 +41,62 @@ class _MapaReportesScreenState extends State<MapaReportesScreen> {
             ),
           );
         }
+        _cargando = false;
       });
+
+      // Ajusta cámara a los marcadores
+      if (_markers.isNotEmpty && _mapController != null) {
+        _fitBounds();
+      }
     } catch (e) {
       if (!mounted) return;
+      setState(() => _cargando = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error cargando reportes: $e")),
       );
     }
   }
 
+  /// Ajusta la cámara para que se vean todos los marcadores
+  void _fitBounds() {
+    if (_markers.isEmpty) return;
+
+    LatLngBounds bounds;
+    final latitudes = _markers.map((m) => m.position.latitude);
+    final longitudes = _markers.map((m) => m.position.longitude);
+
+    bounds = LatLngBounds(
+      southwest: LatLng(latitudes.reduce((a, b) => a < b ? a : b),
+          longitudes.reduce((a, b) => a < b ? a : b)),
+      northeast: LatLng(latitudes.reduce((a, b) => a > b ? a : b),
+          longitudes.reduce((a, b) => a > b ? a : b)),
+    );
+
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+  }
+
   @override
-  Widget build(BuildContext c) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Mapa de Reportes')),
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(18.5, -69.9), // Centro aproximado RD
-          zoom: 7,
-        ),
-        markers: _markers,
-      ),
+      body: _cargando
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: GoogleMap(
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(18.5, -69.9), // Centro de RD como fallback
+                  zoom: 7,
+                ),
+                markers: _markers,
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  if (_markers.isNotEmpty) {
+                    _fitBounds();
+                  }
+                },
+              ),
+            ),
     );
   }
 }
