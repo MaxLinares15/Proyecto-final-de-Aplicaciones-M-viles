@@ -25,21 +25,21 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.green),
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.green),
             child: Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 28,
                   backgroundImage: AssetImage('assets/logo.png'),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 // Usamos Expanded para que el texto se ajuste
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
                         'Ministerio de Medio Ambiente',
                         style: TextStyle(
